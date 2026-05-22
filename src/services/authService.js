@@ -133,6 +133,6 @@ export async function login({ email, password }) {
 
 export async function logout() {
   return {
-    message: 'Logout endpoint placeholder — token revocation not implemented yet',
+    message: 'Logout is handled on the client. Clear the local token/session.',
   }
 }

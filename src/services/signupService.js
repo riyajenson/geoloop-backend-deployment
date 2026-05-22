@@ -110,7 +110,7 @@ export const signupComplete = async (email, otp, password) => {
     username: sessionData.username
   })
 
-  // Mark session as verified (optional, since we delete it immediately after)
+ 
   // Clean up signup session
   await supabase
     .from('signup_sessions')
