@@ -5,9 +5,13 @@ import express from 'express'
 import cors from 'cors'
 
 import authRoutes from './routes/authRoutes.js'
-import profileRoutes from './routes/profileRoutes.js' 
+import profileRoutes from './routes/profileRoutes.js'
 import statsRoutes from './routes/statsRoutes.js'
 import passportRoutes from './routes/passportRoutes.js'
+//import leaderboardRoutes from './routes/leaderboardRoutes.js'
+import testRoutes from './routes/testRoutes.js'
+import otpRoutes from './routes/otpRoutes.js'
+import signupRoutes from './routes/signupRoutes.js'
 
 const app = express()
 
@@ -30,9 +34,13 @@ app.get('/', (req, res) => {
  * Routes
  */
 app.use('/auth', authRoutes)
+app.use('/auth', signupRoutes)
 app.use('/profile', profileRoutes)
 app.use('/stats', statsRoutes)
 app.use('/passport', passportRoutes)
+//app.use('/leaderboard', leaderboardRoutes)
+app.use('/api', testRoutes)
+app.use('/otp', otpRoutes)
 
 /**
  * Server start
