@@ -3,15 +3,36 @@ import * as passportService from '../services/passportService.js'
 export async function addCity(req, res) {
   try {
     const { user_id, city, country } = req.body
+    const authenticatedUserId = req.user?.id
 
-    if (!user_id || !city || !country) {
-      return res.status(400).json({
+    if (!authenticatedUserId) {
+      return res.status(401).json({
         success: false,
-        message: 'Missing required fields: user_id, city, and country',
+        message: 'Missing authenticated user',
+        code: 'AUTH_REQUIRED',
       })
     }
 
-    const newCity = await passportService.addVisitedCity(user_id, city, country)
+    if (user_id && user_id !== authenticatedUserId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Forbidden',
+        code: 'FORBIDDEN',
+      })
+    }
+
+    if (!city || !country) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields: city and country',
+      })
+    }
+
+    const newCity = await passportService.addVisitedCity(
+      authenticatedUserId,
+      city,
+      country
+    )
 
     return res.status(201).json({
       success: true,
