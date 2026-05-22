@@ -7,7 +7,8 @@ CREATE TABLE public.visited_cities (
   CONSTRAINT visited_cities_city_country_not_empty CHECK (
     length(trim(city)) > 0
     AND length(trim(country)) > 0
-  )
+  ),
+  CONSTRAINT visited_cities_user_city_country_unique UNIQUE (user_id, city, country)
 );
 
 CREATE INDEX idx_visited_cities_user_id ON public.visited_cities (user_id);
