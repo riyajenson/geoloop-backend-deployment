@@ -13,28 +13,11 @@ function handleError(res, error) {
 }
 
 export async function signup(req, res) {
-  try {
-    const { email, password, username } = req.body
-
-    if (!email || !password || !username) {
-      return res.status(400).json({
-        success: false,
-        message: 'Missing required fields: email, password, and username',
-        code: 'VALIDATION_ERROR',
-      })
-    }
-
-    const { user, profile, stats } = await authService.signup({ email, password, username })
-
-    return res.status(201).json({
-      success: true,
-      user,
-      profile,
-      stats,
-    })
-  } catch (error) {
-    return handleError(res, error)
-  }
+  return res.status(400).json({
+    success: false,
+    message: 'Signup requires OTP verification. Use /auth/signup-init and /auth/signup-complete.',
+    code: 'OTP_SIGNUP_REQUIRED',
+  })
 }
 
 export async function login(req, res) {

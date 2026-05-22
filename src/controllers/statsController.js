@@ -1,5 +1,22 @@
 import * as statsService from '../services/statsService.js'
 
+const STATS_UPDATE_FIELDS = [
+  'missions_completed',
+  'distance_travelled',
+  'energy',
+  'loop_points',
+]
+
+function pickAllowedFields(source, allowedFields) {
+  return allowedFields.reduce((updates, field) => {
+    if (Object.prototype.hasOwnProperty.call(source, field)) {
+      updates[field] = source[field]
+    }
+
+    return updates
+  }, {})
+}
+
 export async function getStats(req, res) {
   try {
     const { id } = req.params
@@ -29,7 +46,7 @@ export async function getStats(req, res) {
 export async function updateStats(req, res) {
   try {
     const { id } = req.params
-    const updates = req.body
+    const updates = pickAllowedFields(req.body || {}, STATS_UPDATE_FIELDS)
 
     if (!id) {
       return res.status(400).json({

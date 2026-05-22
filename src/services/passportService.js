@@ -34,6 +34,12 @@ export async function addVisitedCity(userId, city, country) {
     .single()
 
   if (error) {
+    if (error.code === '23505') {
+      const conflictError = new Error('City already visited')
+      conflictError.code = 'CITY_ALREADY_VISITED'
+      throw conflictError
+    }
+
     throw error
   }
 

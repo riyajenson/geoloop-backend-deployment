@@ -1,5 +1,21 @@
 import * as profileService from '../services/profileService.js'
 
+const PROFILE_UPDATE_FIELDS = [
+  'username',
+  'avatar_url',
+  'bio',
+]
+
+function pickAllowedFields(source, allowedFields) {
+  return allowedFields.reduce((updates, field) => {
+    if (Object.prototype.hasOwnProperty.call(source, field)) {
+      updates[field] = source[field]
+    }
+
+    return updates
+  }, {})
+}
+
 export async function getProfile(req, res) {
   try {
     const { id } = req.params
@@ -29,7 +45,7 @@ export async function getProfile(req, res) {
 export async function updateProfile(req, res) {
   try {
     const { id } = req.params
-    const updates = req.body
+    const updates = pickAllowedFields(req.body || {}, PROFILE_UPDATE_FIELDS)
 
     if (!id) {
       return res.status(400).json({
