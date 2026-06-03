@@ -101,9 +101,13 @@ export async function signup({ email, password, username }) {
       throw mapAuthError(error)
     }
   } catch (error) {
+    console.error('RAW LOGIN ERROR:')
+    console.error(error)
+  
     if (error instanceof AuthAppError) {
       throw error
     }
+  
     throw mapAuthError(error)
   }
 }

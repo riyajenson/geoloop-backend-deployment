@@ -12,6 +12,7 @@ import passportRoutes from './routes/passportRoutes.js'
 import testRoutes from './routes/testRoutes.js'
 import otpRoutes from './routes/otpRoutes.js'
 import signupRoutes from './routes/signupRoutes.js'
+import friendRoutes from './routes/friendRoutes.js'
 
 const app = express()
 
@@ -38,6 +39,7 @@ app.use('/auth', signupRoutes)
 app.use('/profile', profileRoutes)
 app.use('/stats', statsRoutes)
 app.use('/passport', passportRoutes)
+app.use('/friends', friendRoutes)
 //app.use('/leaderboard', leaderboardRoutes)
 app.use('/api', testRoutes)
 app.use('/otp', otpRoutes)
