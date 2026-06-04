@@ -1,4 +1,5 @@
 import * as authService from '../services/authService.js'
+import * as coinService from '../services/coinService.js'
 
 function handleError(res, error) {
   const statusCode = error.statusCode || 500
@@ -33,6 +34,13 @@ export async function login(req, res) {
     }
 
     const result = await authService.login({ email, password })
+
+    try {
+      const coinReward = await coinService.addCoinsOnLogin(result.user.id)
+      result.coinReward = coinReward
+    } catch (coinError) {
+      console.error('Failed to award coins on login:', coinError)
+    }
 
     return res.status(200).json({
       success: true,
