@@ -270,14 +270,27 @@ export async function updateRoomScore(userId, roomId, scoreIncrement) {
       .single()
 
     if (fetchError || !member) {
-      throw new AuthAppError('User not in room', 404, 'USER_NOT_IN_ROOM')
+      throw new AuthAppError(
+        'User not in room',
+        404,
+        'USER_NOT_IN_ROOM'
+      )
     }
 
-    // Update score
+    const newScore = member.score + scoreIncrement
+
+    if (newScore < 0) {
+      throw new AuthAppError(
+        'Score cannot be negative',
+        400,
+        'INVALID_SCORE'
+      )
+    }
+
     const { data: updated, error: updateError } = await supabase
       .from('room_members')
       .update({
-        score: member.score + scoreIncrement,
+        score: newScore,
       })
       .eq('user_id', userId)
       .eq('room_id', roomId)
@@ -285,7 +298,11 @@ export async function updateRoomScore(userId, roomId, scoreIncrement) {
       .single()
 
     if (updateError) {
-      throw new AuthAppError('Failed to update score', 500, 'UPDATE_ERROR')
+      throw new AuthAppError(
+        'Failed to update score',
+        500,
+        'UPDATE_ERROR'
+      )
     }
 
     return updated
@@ -293,21 +310,31 @@ export async function updateRoomScore(userId, roomId, scoreIncrement) {
     if (error instanceof AuthAppError) {
       throw error
     }
-    throw new AuthAppError('Update score failed', 500, 'UPDATE_SCORE_FAILED')
+
+    throw new AuthAppError(
+      'Update score failed',
+      500,
+      'UPDATE_SCORE_FAILED'
+    )
   }
 }
 
 export async function leaveRoom(userId, roomId) {
   try {
+    const { data: room, error: roomError } = await supabase
+      .from('rooms')
+      .select('creator_id')
+      .eq('id', roomId)
+      .single()
 
-    const { data: members, error: checkError } = await supabase
-      .from('room_members')
-      .select('id', { count: 'exact' })
-      .eq('room_id', roomId)
-
-    if (checkError) {
-      throw new AuthAppError('Failed to check room members', 500, 'CHECK_ERROR')
+    if (roomError || !room) {
+      throw new AuthAppError(
+        'Room not found',
+        404,
+        'ROOM_NOT_FOUND'
+      )
     }
+
     const { error: deleteError } = await supabase
       .from('room_members')
       .delete()
@@ -315,12 +342,53 @@ export async function leaveRoom(userId, roomId) {
       .eq('room_id', roomId)
 
     if (deleteError) {
-      throw new AuthAppError('Failed to leave room', 500, 'DELETE_ERROR')
+      throw new AuthAppError(
+        'Failed to leave room',
+        500,
+        'DELETE_ERROR'
+      )
     }
 
-  
-    if (members.length === 1) {
-      await supabase.from('rooms').delete().eq('id', roomId)
+    const { data: remainingMembers, error: membersError } = await supabase
+      .from('room_members')
+      .select('user_id, joined_at')
+      .eq('room_id', roomId)
+      .order('joined_at', { ascending: true })
+
+    if (membersError) {
+      throw new AuthAppError(
+        'Failed to fetch remaining members',
+        500,
+        'FETCH_ERROR'
+      )
+    }
+
+    if (remainingMembers.length === 0) {
+      await supabase
+        .from('rooms')
+        .delete()
+        .eq('id', roomId)
+
+      return { success: true }
+    }
+
+    if (room.creator_id === userId) {
+      const newCreator = remainingMembers[0]
+
+      const { error: updateRoomError } = await supabase
+        .from('rooms')
+        .update({
+          creator_id: newCreator.user_id,
+        })
+        .eq('id', roomId)
+
+      if (updateRoomError) {
+        throw new AuthAppError(
+          'Failed to transfer ownership',
+          500,
+          'TRANSFER_ERROR'
+        )
+      }
     }
 
     return { success: true }
@@ -328,7 +396,12 @@ export async function leaveRoom(userId, roomId) {
     if (error instanceof AuthAppError) {
       throw error
     }
-    throw new AuthAppError('Leave room failed', 500, 'LEAVE_ROOM_FAILED')
+
+    throw new AuthAppError(
+      'Leave room failed',
+      500,
+      'LEAVE_ROOM_FAILED'
+    )
   }
 }
 
@@ -367,5 +440,47 @@ export async function getRoomDetails(roomId) {
       throw error
     }
     throw new AuthAppError('Get room details failed', 500, 'DETAILS_FAILED')
+  }
+}
+
+export async function getRoomMembers(roomId) {
+  try {
+    const { data, error } = await supabase
+      .from('room_members')
+      .select(`
+        user_id,
+        score,
+        joined_at,
+        profiles:user_id (
+          username
+        )
+      `)
+      .eq('room_id', roomId)
+      .order('score', { ascending: false })
+
+    if (error) {
+      throw new AuthAppError(
+        'Failed to fetch room members',
+        500,
+        'FETCH_ERROR'
+      )
+    }
+
+    return data.map(member => ({
+      userId: member.user_id,
+      username: member.profiles?.username,
+      score: member.score,
+      joinedAt: member.joined_at,
+    }))
+  } catch (error) {
+    if (error instanceof AuthAppError) {
+      throw error
+    }
+
+    throw new AuthAppError(
+      'Get room members failed',
+      500,
+      'GET_MEMBERS_FAILED'
+    )
   }
 }
