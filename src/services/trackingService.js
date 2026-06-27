@@ -64,3 +64,20 @@ exports.getRouteWithPoints = async (routeId, userId) => {
         points
     };
 };
+
+
+//Triggers the spatial database engine to build a polygon and calculate area
+
+exports.processTerritory = async (routeId, userId) => {
+
+    const { data, error } = await supabaseServiceRole
+        .rpc('process_route_territory', {
+            p_route_id: routeId,
+            p_user_id: userId
+        });
+
+    if (error) throw error;
+
+    // If the geometry couldn't form a closed polygon, data[0].is_valid_loop is false
+    return data && data[0] ? data[0] : { territory_id: null, area_sqm: 0, is_valid_loop: false };
+};
