@@ -63,3 +63,48 @@ export async function logout(req, res) {
     return handleError(res, error)
   }
 }
+export async function passwordResetRequest(req, res) {
+  try {
+    const { email } = req.body || {}
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required field: email',
+        code: 'VALIDATION_ERROR',
+      })
+    }
+
+    await authService.requestPasswordReset(email)
+
+    return res.status(200).json({
+      success: true,
+      message: 'Password reset code dispatched to email',
+    })
+  } catch (error) {
+    return handleError(res, error)
+  }
+}
+
+export async function passwordResetComplete(req, res) {
+  try {
+    const { email, otpCode, newPassword } = req.body || {}
+
+    if (!email || !otpCode || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields: email, otpCode, and newPassword',
+        code: 'VALIDATION_ERROR',
+      })
+    }
+
+    await authService.completePasswordReset(email, otpCode, newPassword)
+
+    return res.status(200).json({
+      success: true,
+      message: 'Password updated successfully',
+    })
+  } catch (error) {
+    return handleError(res, error)
+  }
+}
