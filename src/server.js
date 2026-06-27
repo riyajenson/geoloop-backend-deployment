@@ -14,6 +14,7 @@ import testRoutes from './routes/testRoutes.js'
 import otpRoutes from './routes/otpRoutes.js'
 import signupRoutes from './routes/signupRoutes.js'
 import friendRoutes from './routes/friendRoutes.js'
+const trackingRoutes = require('./routes/trackingRoutes');
 
 const app = express()
 app.use(cors())
@@ -36,6 +37,7 @@ app.use('/friends', friendRoutes)
 //app.use('/leaderboard', leaderboardRoutes)
 app.use('/api', testRoutes)
 app.use('/otp', otpRoutes)
+app.use('/tracking', trackingRoutes)
 
 const PORT = process.env.PORT || 5000
 
