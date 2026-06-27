@@ -1,6 +1,7 @@
 import express from 'express'
 import * as friendController from '../controllers/friendController.js'
 import { requireAuth } from '../middleware/authMiddleware.js'
+import { unfriend } from '../controllers/friendController.js';
 
 const router = express.Router()
 
@@ -12,5 +13,5 @@ router.get('/search', requireAuth, friendController.searchUsers)
 router.get('/', requireAuth, friendController.getFriends)
 router.get('/:friendId/passport', requireAuth, friendController.getFriendPassport)
 router.get('/:friendId', requireAuth, friendController.getFriendProfile)
-
+router.delete('/:friendId', unfriend);
 export default router

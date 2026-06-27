@@ -358,3 +358,21 @@ export async function getFriendPassport(userId, friendId) {
 
   return passportService.getVisitedCities(friendId)
 }
+
+export async function removeFriendship(userId, friendId) {
+
+  const { error } = await supabaseServiceRole
+    .from('friends')
+    .delete()
+    .or(`and(user_id.eq.${userId},friend_id.eq.${friendId}),and(user_id.eq.${friendId},friend_id.eq.${userId})`);
+
+  if (error) throw error;
+
+
+  await supabaseServiceRole
+    .from('friend_requests')
+    .delete()
+    .or(`and(sender_id.eq.${userId},receiver_id.eq.${friendId}),and(sender_id.eq.${friendId},receiver_id.eq.${userId})`);
+
+  return true;
+}
