@@ -14,6 +14,8 @@ import testRoutes from './routes/testRoutes.js'
 import otpRoutes from './routes/otpRoutes.js'
 import signupRoutes from './routes/signupRoutes.js'
 import friendRoutes from './routes/friendRoutes.js'
+import activityRoutes from './routes/activityRoutes.js'
+import notificationRoutes from './routes/notificationRoutes.js'
 const trackingRoutes = require('./routes/trackingRoutes');
 
 const app = express()
@@ -38,6 +40,8 @@ app.use('/friends', friendRoutes)
 app.use('/api', testRoutes)
 app.use('/otp', otpRoutes)
 app.use('/tracking', trackingRoutes)
+app.use('/activity', activityRoutes)
+app.use('/notifications', notificationRoutes)
 
 const PORT = process.env.PORT || 5000
 
