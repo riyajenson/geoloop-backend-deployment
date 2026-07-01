@@ -4,7 +4,16 @@ const statsService = require('../services/statsService'); // Pull in your existi
 exports.saveTrack = async (req, res, next) => {
     try {
         const userId = req.user.id;
-        const { localSessionId, startedAt, endedAt, points } = req.body;
+        const {
+            localSessionId,
+            startedAt,
+            endedAt,
+            points,
+            distanceMetres,
+            elevationGainMetres,
+            avgPaceSecondsPerKm,
+            splits
+        } = req.body;
 
         if (!localSessionId || !startedAt || !endedAt || !Array.isArray(points) || points.length === 0) {
             return res.status(400).json({ error: 'Missing or malformed tracking data payloads.' });
@@ -15,7 +24,11 @@ exports.saveTrack = async (req, res, next) => {
             localSessionId,
             startedAt,
             endedAt,
-            points
+            points,
+            distanceMetres,
+            elevationGainMetres,
+            avgPaceSecondsPerKm,
+            splits
         });
 
         // 2. Process spatial polygon loop configurations

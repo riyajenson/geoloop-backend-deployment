@@ -1,34 +1,38 @@
-const { supabaseServiceRole } = require('../config/supabase'); // Adapts to your database client config
+import { supabaseServiceRole } from '../config/supabase.js'
 
-exports.createRouteSession = async (userId, data) => {
-    // 1. Insert parent session data
+export async function createRouteSession(userId, data) {
+    // 1. Insert parent session with new metric columns passed from frontend
     const { data: session, error: sessionError } = await supabaseServiceRole
         .from('route_sessions')
         .insert([{
             user_id: userId,
             local_session_id: data.localSessionId,
             started_at: data.startedAt,
-            ended_at: data.endedAt
+            ended_at: data.endedAt,
+            distance_metres: data.distanceMetres || null,
+            elevation_gain_metres: data.elevationGainMetres || null,
+            avg_pace_seconds_per_km: data.avgPaceSecondsPerKm || null,
+            splits: data.splits ? JSON.stringify(data.splits) : '[]'
         }])
         .select()
         .single();
 
     if (sessionError) throw sessionError;
 
-    // 2. Format the point streams with the newly minted session UUID, explicitly handling altitude
-    const bulkPoints = data.points.map((pt) => ({
+    // 2. Format point streams supporting both native telemetry and simplified { lat, lng } signatures
+    const bulkPoints = data.points.map((pt, idx) => ({
         session_id: session.id,
-        sequence_index: pt.sequenceIndex,
-        latitude: pt.latitude,
-        longitude: pt.longitude,
-        accuracy: pt.accuracy,
-        altitude: pt.altitude, // Synced with frontend payload schema
-        speed: pt.speed,
-        heading: pt.heading,
-        recorded_at: pt.recordedAt
+        sequence_index: pt.sequenceIndex !== undefined ? pt.sequenceIndex : idx,
+        latitude: pt.latitude ?? pt.lat, // Resolves the gap with simplified paths safely
+        longitude: pt.longitude ?? pt.lng, // Resolves the gap with simplified paths safely
+        accuracy: pt.accuracy ?? null,
+        altitude: pt.altitude ?? null,
+        speed: pt.speed ?? null,
+        heading: pt.heading ?? null,
+        recorded_at: pt.recordedAt ?? new Date().toISOString()
     }));
 
-    // 3. Bulk insert points efficiently
+    // 3. Perform a bulk insert of the formatted telemetry points
     const { error: pointsError } = await supabaseServiceRole
         .from('route_points')
         .insert(bulkPoints);
@@ -36,11 +40,12 @@ exports.createRouteSession = async (userId, data) => {
     if (pointsError) throw pointsError;
 
     return { routeId: session.id };
-};
+}
 
-
-exports.getRouteWithPoints = async (routeId, userId) => {
-    // Fetch parent session data (verifying ownership)
+/**
+ * Retrieves a tracking metadata entry combined with its ordered structural track coordinates
+ */
+export async function getRouteWithPoints(routeId, userId) {
     const { data: session, error: sErr } = await supabaseServiceRole
         .from('route_sessions')
         .select('*')
@@ -50,7 +55,6 @@ exports.getRouteWithPoints = async (routeId, userId) => {
 
     if (sErr || !session) return null;
 
-    // Fetch matching trail coordinates ordered by sequence index
     const { data: points, error: pErr } = await supabaseServiceRole
         .from('route_points')
         .select('sequence_index, latitude, longitude, accuracy, altitude, speed, recorded_at')
@@ -63,21 +67,4 @@ exports.getRouteWithPoints = async (routeId, userId) => {
         ...session,
         points
     };
-};
-
-
-//Triggers the spatial database engine to build a polygon and calculate area
-
-exports.processTerritory = async (routeId, userId) => {
-
-    const { data, error } = await supabaseServiceRole
-        .rpc('process_route_territory', {
-            p_route_id: routeId,
-            p_user_id: userId
-        });
-
-    if (error) throw error;
-
-    // If the geometry couldn't form a closed polygon, data[0].is_valid_loop is false
-    return data && data[0] ? data[0] : { territory_id: null, area_sqm: 0, is_valid_loop: false };
-};
+}
