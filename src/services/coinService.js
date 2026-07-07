@@ -1,8 +1,8 @@
 import supabase from '../config/supabase.js'
 import { AuthAppError } from '../utils/authErrors.js'
 
-const LOGIN_BONUS_COINS = 10 
-const DAILY_LOGIN_LIMIT = 1 
+const LOGIN_BONUS_COINS = 10
+const DAILY_LOGIN_LIMIT = 1
 
 export async function addCoinsOnLogin(userId) {
   try {
@@ -43,21 +43,23 @@ export async function addCoinsOnLogin(userId) {
 
 export async function addCoins(userId, amount) {
   try {
-    if (amount <= 0) {
-      throw new AuthAppError('Amount must be positive', 400, 'INVALID_AMOUNT')
+    const { data: newCoinCount, error: rpcError } = await supabase.rpc('increment_coins', {
+      user_id: userId,
+      amount: amount
+    })
+
+    if (rpcError) {
+      throw new AuthAppError('Failed to add coins via database RPC', 500, 'ADD_COINS_ERROR')
     }
 
-    const { data: updatedStats, error } = await supabase
+    const { data: updatedStats, error: fetchError } = await supabase
       .from('user_stats')
-      .update({
-        coins: supabase.rpc('increment_coins', { user_id: userId, amount }),
-      })
+      .select('*')
       .eq('user_id', userId)
-      .select()
       .single()
 
-    if (error) {
-      throw new AuthAppError('Failed to add coins', 500, 'ADD_COINS_ERROR')
+    if (fetchError) {
+      throw new AuthAppError('Failed to retrieve updated stats row', 500, 'ADD_COINS_ERROR')
     }
 
     return updatedStats

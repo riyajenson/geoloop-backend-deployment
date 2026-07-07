@@ -16,7 +16,7 @@ import signupRoutes from './routes/signupRoutes.js'
 import friendRoutes from './routes/friendRoutes.js'
 import activityRoutes from './routes/activityRoutes.js'
 import notificationRoutes from './routes/notificationRoutes.js'
-const trackingRoutes = require('./routes/trackingRoutes');
+import trackingRoutes from './routes/trackingRoutes.js'
 
 const app = express()
 app.use(cors())
@@ -39,10 +39,9 @@ app.use('/friends', friendRoutes)
 //app.use('/leaderboard', leaderboardRoutes)
 app.use('/api', testRoutes)
 app.use('/otp', otpRoutes)
-app.use('/tracking', trackingRoutes)
 app.use('/activity', activityRoutes)
 app.use('/notifications', notificationRoutes)
-
+app.use('/tracking', trackingRoutes)
 const PORT = process.env.PORT || 5000
 
 app.listen(PORT, () => {
