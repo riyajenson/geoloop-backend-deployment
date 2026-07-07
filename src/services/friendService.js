@@ -1,5 +1,6 @@
 import supabase from '../config/supabase.js'
 import * as passportService from './passportService.js'
+import { supabaseServiceRole } from '../config/supabase.js'
 
 const PROFILE_PUBLIC_FIELDS = 'id, username, avatar_url, xp, level'
 

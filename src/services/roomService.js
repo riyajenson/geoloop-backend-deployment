@@ -56,7 +56,7 @@ export async function createRoom(userId, roomName) {
       )
     }
 
-  //rrom create
+    //rrom create
     const { data: room, error: roomError } = await supabase
       .from('rooms')
       .insert({
