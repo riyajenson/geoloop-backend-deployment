@@ -42,9 +42,6 @@ export async function createRouteSession(userId, data) {
     return { routeId: session.id };
 }
 
-/**
- * Retrieves a tracking metadata entry combined with its ordered structural track coordinates
- */
 export async function getRouteWithPoints(routeId, userId) {
     const { data: session, error: sErr } = await supabaseServiceRole
         .from('route_sessions')
@@ -67,4 +64,19 @@ export async function getRouteWithPoints(routeId, userId) {
         ...session,
         points
     };
+}
+
+//Processes polygon coordinates for closed-loop territory evaluation via PostGIS
+
+export async function processTerritory(routeId, userId) {
+    const { data, error } = await supabaseServiceRole.rpc('process_route_territory', {
+        target_session_id: routeId
+    })
+
+    if (error) {
+        console.error('PostGIS Territory Processing Error:', error)
+        return { success: false, area_sqm: 0, xp_earned: 0 }
+    }
+
+    return data || { success: true }
 }

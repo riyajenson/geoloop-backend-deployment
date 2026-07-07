@@ -1,7 +1,7 @@
-const trackingService = require('../services/trackingService');
-const statsService = require('../services/statsService'); // Pull in your existing stats/XP logic
+import * as trackingService from '../services/trackingService.js'
+import * as statsService from '../services/statsService.js' // Pull in your existing stats/XP logic
 
-exports.saveTrack = async (req, res, next) => {
+export async function saveTrack(req, res, next) {
     try {
         const userId = req.user.id;
         const {
@@ -59,4 +59,20 @@ exports.saveTrack = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
-};
+}
+
+export async function getTrackDetails(req, res) {
+    try {
+        const { routeId } = req.params
+        const userId = req.user.id
+
+        const track = await trackingService.getRouteWithPoints(routeId, userId)
+        if (!track) {
+            return res.status(404).json({ success: false, message: 'Track session not found' })
+        }
+
+        return res.status(200).json({ success: true, data: track })
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message })
+    }
+}

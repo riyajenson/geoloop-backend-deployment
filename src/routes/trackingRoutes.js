@@ -1,12 +1,12 @@
-const express = require('express');
-const router = express.Router();
-const trackingController = require('../controllers/trackingController');
-const { requireAuth } = require('../middleware/authMiddleware');
+import { Router } from 'express'
+import { saveTrack, getTrackDetails } from '../controllers/trackingController.js'
+import { requireAuth } from '../middleware/authMiddleware.js'
 
+const router = Router()
 
-router.use(requireAuth);
+router.use(requireAuth)
 
-router.post('/complete', trackingController.saveTrack);
-router.get('/:routeId', trackingController.getTrackDetails);
+router.post('/complete', saveTrack)
+router.get('/:routeId', getTrackDetails)
 
-module.exports = router;
+export default router
