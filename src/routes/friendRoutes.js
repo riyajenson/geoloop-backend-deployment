@@ -1,17 +1,19 @@
-import express from 'express'
-import * as friendController from '../controllers/friendController.js'
-import { requireAuth } from '../middleware/authMiddleware.js'
-import { unfriend } from '../controllers/friendController.js';
+import express from 'express';
+import * as friendController from '../controllers/friendController.js';
+import { requireAuth } from '../middleware/authMiddleware.js';
 
-const router = express.Router()
+const router = express.Router();
 
-router.post('/request', requireAuth, friendController.sendRequest)
-router.get('/pending', requireAuth, friendController.getPending)
-router.post('/accept', requireAuth, friendController.acceptRequest)
-router.post('/reject', requireAuth, friendController.rejectRequest)
-router.get('/search', requireAuth, friendController.searchUsers)
-router.get('/', requireAuth, friendController.getFriends)
-router.get('/:friendId/passport', requireAuth, friendController.getFriendPassport)
-router.get('/:friendId', requireAuth, friendController.getFriendProfile)
-router.delete('/:friendId', unfriend);
-export default router
+router.use(requireAuth);
+
+router.post('/request', friendController.sendRequest);
+router.get('/pending', friendController.getPending);
+router.post('/accept', friendController.acceptRequest);
+router.post('/reject', friendController.rejectRequest);
+router.get('/search', friendController.searchUsers);
+router.get('/', friendController.getFriends);
+router.get('/:friendId/passport', friendController.getFriendPassport);
+router.get('/:friendId', friendController.getFriendProfile);
+router.delete('/:friendId', friendController.unfriend);
+
+export default router;
