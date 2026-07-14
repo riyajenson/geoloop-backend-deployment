@@ -1,62 +1,13 @@
-import nodemailer from 'nodemailer'
+﻿import nodemailer from 'nodemailer'
 
-const transporter =
-  nodemailer.createTransport({
-
-    service: 'gmail',
-
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
-    },
-
-    tls: {
-      rejectUnauthorized: false
-    }
-})
-
-export const sendOtpEmail =
-  async (email, otp) => {
-
-    try {
-
-      const info =
-        await transporter.sendMail({
-
-          from:
-            `"GeoLoop" <${process.env.EMAIL_USER}>`,
-
-          to: email,
-
-          subject: 'GeoLoop OTP',
-
-          html: `
-            <div>
-              <h2>GeoLoop Verification</h2>
-
-              <p>Your OTP is:</p>
-
-              <h1>${otp}</h1>
-
-              <p>
-                OTP expires in 5 minutes
-              </p>
-            </div>
-          `
-        })
-
-      console.log(
-        'EMAIL SENT:',
-        info.response
-      )
-
-    } catch (error) {
-
-      console.error(
-        'EMAIL ERROR:',
-        error
-      )
-
-      throw error
-    }
+export const sendOtpEmail = async (email, otp) => {
+  try {
+    console.log("==========================================");
+    console.log(`[DEV MODE] OTP Generated for ${email}: ${otp}`);
+    console.log("==========================================");
+    return { messageId: "mock-dev-id" };
+  } catch (error) {
+    console.error("Mock email dispatcher encountered an error:", error);
+    throw error;
+  }
 }
