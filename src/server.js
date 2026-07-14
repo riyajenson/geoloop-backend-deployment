@@ -41,7 +41,7 @@ app.use('/api', testRoutes)
 app.use('/otp', otpRoutes)
 app.use('/activity', activityRoutes)
 app.use('/notifications', notificationRoutes)
-app.use('/tracking', trackingRoutes)
+app.use('/api/tracking', trackingRoutes)
 const PORT = process.env.PORT || 5000
 
 app.listen(PORT, () => {
