@@ -9,6 +9,7 @@ export async function createRouteSession(userId, data) {
             local_session_id: data.localSessionId,
             started_at: data.startedAt,
             ended_at: data.endedAt,
+            duration_seconds: data.durationSeconds || null,
             distance_metres: data.distanceMetres || null,
             elevation_gain_metres: data.elevationGainMetres || null,
             avg_pace_seconds_per_km: data.avgPaceSecondsPerKm || null,
