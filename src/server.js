@@ -29,8 +29,8 @@ app.get('/', (req, res) => {
 })
 
 
-app.use('/auth', authRoutes)
-app.use('/auth', signupRoutes)
+app.use('/api/auth', authRoutes)
+app.use('/api/auth', signupRoutes)
 app.use('/profile', profileRoutes)
 app.use('/stats', statsRoutes)
 app.use('/passport', passportRoutes)
