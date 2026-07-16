@@ -29,8 +29,8 @@ app.get('/', (req, res) => {
 })
 
 
-app.use('/api/auth', authRoutes)
-app.use('/api/auth', signupRoutes)
+app.use('/api/auth', authRoutes);
+app.use('/auth', signupRoutes)
 app.use('/profile', profileRoutes)
 app.use('/stats', statsRoutes)
 app.use('/passport', passportRoutes)
@@ -41,9 +41,11 @@ app.use('/api', testRoutes)
 app.use('/otp', otpRoutes)
 app.use('/activity', activityRoutes)
 app.use('/notifications', notificationRoutes)
-app.use('/api/tracking', trackingRoutes)
+app.use('/tracking', trackingRoutes)
+
+
 const PORT = process.env.PORT || 5000
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`)
 })
